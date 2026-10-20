@@ -1,0 +1,18 @@
+{
+	"name": "@flaremail/frontend",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@flaremail/contracts": "workspace:*",
+		"@lucide/svelte": "^1.60.0",
+		"@tiptap/core": "^3.32.0",
+		"@tiptap/pm": "^3.32.0",
+		"@tiptap/starter-kit": "^3.32.0",
+		"bits-ui": "^2.19.5",
+		"cbor-x": "^1.6.8",
+		"dompurify": "^3.4.17",
+		"sv-router": "^0.19.0",
+		"svelte": "^5.57.2",
+		"svelte-sonner": "^1.2.1"
+	}
+}

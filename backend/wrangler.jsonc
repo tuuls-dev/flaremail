@@ -1,0 +1,20 @@
+{
+	"$schema": "../node_modules/wrangler/config-schema.json",
+	"name": "flaremail",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-19",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"directory": "../dist/client",
+		"not_found_handling": "single-page-application",
+		"run_worker_first": ["/api/*"],
+	},
+	"secrets": { "required": ["TURSO_AUTH_TOKEN"] },
+	"send_email": [{ "name": "EMAIL" }],
+	"vars": {
+		"APP_ORIGIN": "http://127.0.0.1:5173",
+		"TURSO_DATABASE_URL": "libsql://configure-before-deployment.turso.io",
+		"SEND_MODE": "simulate",
+	},
+	"observability": { "enabled": true, "traces": { "enabled": true } },
+}

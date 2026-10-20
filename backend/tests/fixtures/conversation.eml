@@ -1,0 +1,22 @@
+From: Jordan Lee <jordan@example.net>
+To: Team <hello@example.com>
+Subject: A little something for next week
+Message-ID: <first-conversation@example.net>
+Date: Tue, 20 Oct 2026 08:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="mail-boundary"
+
+--mail-boundary
+Content-Type: text/plain; charset="utf-8"
+
+Hi team,
+
+I’ve put together a few ideas for next week. Let me know what you think.
+
+Talk soon,
+Jordan
+--mail-boundary
+Content-Type: text/html; charset="utf-8"
+
+<p>Hi team,</p><p>I’ve put together a few ideas for <strong>next week</strong>. Let me know what you think.</p><p>Talk soon,<br>Jordan</p><script>window.parent.hacked=true</script><img src="https://tracker.example/pixel.gif" onerror="alert(1)">
+--mail-boundary--
