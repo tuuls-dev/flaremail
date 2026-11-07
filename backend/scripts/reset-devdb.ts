@@ -9,7 +9,9 @@ export function parseDevelopmentDatabaseConfiguration(
 	nodeEnvironment?: string,
 ) {
 	if (!nodeEnvironment || nodeEnvironment === "production") {
-		throw new Error("Refusing to reset a database in unknown environment mode. set NODE_ENV=development first.");
+		throw new Error(
+			"Refusing to reset a database in unknown environment mode. set NODE_ENV=development first.",
+		);
 	}
 
 	const configuration = parseEnv(configurationText);
