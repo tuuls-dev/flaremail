@@ -79,38 +79,6 @@ describe("mail ingestion, drafts, and sending", () => {
 			fixture.database.close();
 		}
 	});
-	it("accepts the intentionally unauthenticated webhook and refuses unknown recipients", async () => {
-		const fixture = await createTestFixture();
-
-		try {
-			const { mailbox } = await createTestMailbox(fixture);
-			const rawEmail = await readFixtureMail();
-			const response = await fixture.application.fetch(
-				new Request("http://mail.test/api/webhooks/inbound", {
-					method: "POST",
-					headers: {
-						"Content-Type": "message/rfc822",
-						"X-Envelope-From": "jordan@example.net",
-						"X-Envelope-To": mailbox.address,
-					},
-					body: new Uint8Array(rawEmail),
-				}),
-				{ APP_ORIGIN: "http://mail.test" },
-			);
-			expect(response.status).toBe(200);
-			const missing = await fixture.application.fetch(
-				new Request("http://mail.test/api/webhooks/inbound", {
-					method: "POST",
-					headers: { "X-Envelope-To": "nope@example.com" },
-					body: new Uint8Array(rawEmail),
-				}),
-				{ APP_ORIGIN: "http://mail.test" },
-			);
-			expect(missing.status).toBe(404);
-		} finally {
-			fixture.database.close();
-		}
-	});
 	it("detects competing draft saves and prevents other users from opening private drafts", async () => {
 		const fixture = await createTestFixture();
 

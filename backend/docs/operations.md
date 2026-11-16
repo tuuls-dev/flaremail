@@ -6,7 +6,7 @@ Keep development and production on separate Turso Cloud databases. Do not point 
 
 Both environments use the same deployed application code and Worker runtime. `SEND_MODE=simulate` is an explicit provider simulation that stores Sent messages without external delivery. Set `SEND_MODE=live` only after Cloudflare Email Sending and your sender domains are ready.
 
-The compatibility date is `2026-10-19`: the newest date supported by the installed workerd binary during implementation. Keep both Worker configs and generated types in sync when upgrading.
+The compatibility date is `2026-10-19`. Keep the Worker config and generated types in sync when upgrading.
 
 ## Prepare production
 
@@ -23,13 +23,12 @@ A successful build or deploy dry run does not prove external mail delivery. Veri
 ## Cloudflare email
 
 - Enable Email Sending and onboard each sender domain. Publish the supplied SPF/DKIM records and a deliberate DMARC policy.
-- Configure the main Worker’s native `EMAIL` binding. No SMTP credentials are used in the selected architecture.
-- Set `backend/email-routing/wrangler.jsonc`’s `INBOUND_URL` to the deployed app’s `/api/webhooks/inbound` URL and deploy the receiver.
-- Enable Email Routing and publish its MX records. Point domain/address rules or a catch-all rule at `flaremail-receiver` in the dashboard.
+- Configure the application Worker’s native `EMAIL` binding for live outbound mail.
+- Enable Email Routing and publish its MX records. In the dashboard, set the relevant address rules or catch-all rule to **Send to a Worker** and select `flaremail`.
 - Mark the domain ready in Flaremail only after completing these manual steps. The app does not claim to have verified Cloudflare configuration.
-- The inbound endpoint intentionally has no authentication. It still validates envelope metadata and application size limits. Receiving into disabled mailboxes or unready domains is rejected.
+- The Worker’s `email()` handler gets the SMTP envelope from Cloudflare. It rejects messages exceeding 5 MiB and mail for unavailable mailboxes or unready domains. Unexpected ingestion failures are retried up to twice and then surface as Worker errors.
 
-Documentation: [sending binding](https://developers.cloudflare.com/email-service/api/send-emails/workers-api/), [Email Routing](https://developers.cloudflare.com/email-service/api/route-emails/email-handler/), [Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/).
+See the [sending binding](https://developers.cloudflare.com/email-service/api/send-emails/workers-api/), [Email Routing rules](https://developers.cloudflare.com/email-service/configuration/email-routing-addresses/), and [Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/) documentation.
 
 ## Send recovery
 

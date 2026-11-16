@@ -20,9 +20,8 @@
 		"test": "bun test backend frontend/src",
 		"lint": "bun oxlint && bun oxfmt --check && bun check",
 		"format": "oxfmt",
-		"types": "wrangler types backend/worker-configuration.d.ts --config backend/wrangler.jsonc --env-interface BackendEnv --strict-vars false && wrangler types backend/email-routing/worker-configuration.d.ts --config backend/email-routing/wrangler.jsonc --env-interface RoutingEnv --strict-vars false",
-		"deploy": "bun run build && wrangler deploy",
-		"deploy:receiver": "wrangler deploy --config backend/email-routing/wrangler.jsonc",
+		"types": "wrangler types backend/worker-configuration.d.ts --config backend/wrangler.jsonc --env-interface BackendEnv --strict-vars false",
+		"deploy": "bun run build && wrangler deploy --config dist/flaremail/wrangler.json",
 		"test:runtime": "bun backend/tests/runtime/smoke.ts"
 	},
 	"devDependencies": {

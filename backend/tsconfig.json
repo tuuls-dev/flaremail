@@ -9,8 +9,6 @@
 		"contracts/src/**/*.ts",
 		"scripts/**/*.ts",
 		"tests/**/*.ts",
-		"email-routing/src/**/*.ts",
-		"email-routing/worker-configuration.d.ts",
 		"worker-configuration.d.ts"
 	]
 }

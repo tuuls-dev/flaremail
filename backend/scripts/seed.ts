@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop -- Seed messages are submitted in order through the real inbound HTTP endpoint. */
+/* eslint-disable no-await-in-loop -- Seed messages are submitted in order through the local email simulator. */
 const mailboxAddress = process.env.SEED_MAILBOX;
 
 if (!mailboxAddress) {
@@ -8,6 +8,13 @@ if (!mailboxAddress) {
 }
 
 const applicationOrigin = process.env.APP_ORIGIN ?? "http://127.0.0.1:5173";
+const simulatorUrl = new URL("/cdn-cgi/local/email", applicationOrigin);
+
+if (!["127.0.0.1", "localhost", "[::1]"].includes(simulatorUrl.hostname)) {
+	throw new Error("Set APP_ORIGIN to the local Vite server to seed demo mail.");
+}
+
+simulatorUrl.searchParams.set("to", mailboxAddress);
 const examples = [
 	{
 		name: "Jordan Lee",
@@ -56,25 +63,21 @@ for (const [index, example] of examples.entries()) {
 		"",
 		example.body,
 	].join("\r\n");
-	const response = await fetch(`${applicationOrigin}/api/webhooks/inbound`, {
+	simulatorUrl.searchParams.set("from", example.address);
+	const response = await fetch(simulatorUrl, {
 		method: "POST",
-		headers: {
-			"Content-Type": "message/rfc822",
-			"X-Envelope-From": example.address,
-			"X-Envelope-To": mailboxAddress,
-		},
+		headers: { "Content-Type": "message/rfc822" },
 		body: rawEmail,
 	});
 
 	if (!response.ok) {
-		throw new Error(
-			`Could not seed message (${response.status}). Check the recipient mailbox and domain readiness.`,
-		);
+		const failure = await response.text();
+		throw new Error(`Could not seed message (${response.status}). ${failure}`);
 	}
 
 	await response.body?.cancel();
 }
 
-console.log("Submitted five sample conversations through the inbound webhook.");
+console.log("Submitted five sample conversations through the local email simulator.");
 
 export {};

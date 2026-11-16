@@ -125,13 +125,8 @@
 		</li>
 		<li>
 			<b>Enable Email Routing</b><span
-				>Configure the MX records Cloudflare provides. Add a catch-all rule pointing to your
-				deployed flaremail-receiver Worker.</span
-			>
-		</li>
-		<li>
-			<b>Connect the receiving Worker</b><span
-				>Set INBOUND_URL to your instance’s /api/webhooks/inbound endpoint.</span
+				>Configure the MX records Cloudflare provides. Route the mailbox addresses or the domain’s
+				catch-all to your deployed flaremail Worker.</span
 			>
 		</li>
 		<li>

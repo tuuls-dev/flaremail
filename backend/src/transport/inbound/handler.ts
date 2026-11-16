@@ -1,25 +1,44 @@
-import { AppError, email } from "@flaremail/contracts";
+/* eslint-disable no-await-in-loop -- Each ingestion retry depends on the previous attempt. */
+import { AppError, email, MAX_MESSAGE_SIZE } from "@flaremail/contracts";
 import type { Database } from "../../platform/database/client";
 import { ingestEmail } from "../../modules/mail/index";
 
-export async function receiveInboundEmail(request: Request, database: Database) {
-	const sender = request.headers.get("X-Envelope-From") ?? "";
-	const recipient = email.safeParse(request.headers.get("X-Envelope-To"));
+type InboundEmail = Pick<ForwardableEmailMessage, "from" | "to" | "raw" | "rawSize" | "setReject">;
+const maxIngestionAttempts = 3;
 
-	if (!recipient.success || sender.length > 254 || /[\r\n]/.test(sender)) {
-		return Response.json({ error: "Valid envelope metadata is required." }, { status: 400 });
+export async function receiveInboundEmail(message: InboundEmail, database: Database) {
+	if (message.rawSize > MAX_MESSAGE_SIZE) {
+		message.setReject("Message exceeds the 5 MiB application limit.");
+		return;
 	}
 
-	try {
-		const rawEmail = new Uint8Array(await request.arrayBuffer());
-		const result = await ingestEmail(database, rawEmail, { from: sender, to: recipient.data });
-		return Response.json(result);
-	} catch (error) {
-		if (error instanceof AppError) {
-			const status = error.kind === "NOT_FOUND" ? 404 : 400;
-			return Response.json({ error: error.message }, { status });
-		}
+	const sender = message.from;
+	const recipient = email.safeParse(message.to);
 
-		throw error;
+	if (!recipient.success || sender.length > 254 || /[\r\n]/.test(sender)) {
+		message.setReject("Valid envelope metadata is required.");
+		return;
+	}
+
+	const rawEmail = new Uint8Array(await new Response(message.raw).arrayBuffer());
+	const envelope = { from: sender, to: recipient.data };
+
+	for (let attempt = 1; attempt <= maxIngestionAttempts; attempt++) {
+		try {
+			await ingestEmail(database, rawEmail, envelope);
+			return;
+		} catch (error) {
+			if (error instanceof AppError) {
+				message.setReject(error.message);
+				return;
+			}
+
+			if (attempt === maxIngestionAttempts) {
+				throw error;
+			}
+
+			const retryDelay = 250 * attempt;
+			await new Promise<void>((resolve) => setTimeout(resolve, retryDelay));
+		}
 	}
 }

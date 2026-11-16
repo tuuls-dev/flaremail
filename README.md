@@ -27,11 +27,10 @@ flowchart LR
     Browser["Svelte webmail"] -->|"Same-origin CBOR RPC"| App["Hono application Worker"]
     App --> Database[("Turso / libSQL")]
     App -->|"Native EMAIL binding"| Sending["Cloudflare Email Sending"]
-    Routing["Cloudflare Email Routing"] --> Receiver["Receiver Worker"]
-    Receiver -->|"Raw MIME + envelope metadata"| App
+    Routing["Cloudflare Email Routing"] -->|"Native email event"| App
 ```
 
-The application Worker serves both the browser assets and API. A separately deployed receiver forwards inbound mail to `/api/webhooks/inbound`; it has no database credentials. Turso stores metadata, drafts, raw MIME, and attachments, with binary content split into 256 KiB chunks. No separate object store is required.
+The application Worker serves the browser assets and API and receives inbound mail directly from Cloudflare Email Routing. Turso stores metadata, drafts, raw MIME, and attachments, with binary content split into 256 KiB chunks. No separate object store is required.
 
 | Layer       | Technology                                             |
 | ----------- | ------------------------------------------------------ |
@@ -88,7 +87,7 @@ The Vite/Workers runtime loads `backend/.dev.vars` automatically. Bun CLI script
 4. Create a mailbox, such as `hello@example.com`.
 5. Open the mailbox’s **Access** dialog and grant yourself access. Creating a mailbox does not grant access automatically, even to an instance administrator.
 
-With the app running, submit five sample conversations through the real inbound webhook:
+With the local app running, use the Cloudflare email simulator to deliver five sample conversations to the Worker's `email()` handler.
 
 ```sh
 SEED_MAILBOX=hello@example.com bun demo:seed
@@ -105,9 +104,8 @@ Replace the address with your configured mailbox. You can now read, search, comp
 | `APP_ORIGIN`         | Exact application origin; defaults to `http://127.0.0.1:5173` in development. Use your HTTPS origin in production. |
 | `SEND_MODE`          | `simulate` stores a Sent copy without external delivery; `live` calls the native email binding.                    |
 | `EMAIL`              | Main Worker’s `send_email` binding, already declared in its Wrangler configuration.                                |
-| `INBOUND_URL`        | Receiver Worker’s destination, set to `https://your-mail-host/api/webhooks/inbound`.                               |
 
-Application configuration lives in [`backend/wrangler.jsonc`](backend/wrangler.jsonc); receiver configuration lives in [`backend/email-routing/wrangler.jsonc`](backend/email-routing/wrangler.jsonc). Local overrides belong in `backend/.dev.vars`. The checked-in database URL is a placeholder and must be replaced for deployment.
+Application configuration lives in [`backend/wrangler.jsonc`](backend/wrangler.jsonc). Local overrides belong in `backend/.dev.vars`. The checked-in database URL is a placeholder and must be replaced for deployment.
 
 ## Development
 
@@ -121,7 +119,7 @@ Application configuration lives in [`backend/wrangler.jsonc`](backend/wrangler.j
 | `bun test`                                            | Run backend and frontend-source tests.                                                               |
 | `bun run test:runtime`                                | Run read-only protocol smoke checks against the running app.                                         |
 | `bun run build`                                       | Build browser assets and the application Worker.                                                     |
-| `bun run types`                                       | Regenerate bindings for both Workers after configuration changes.                                    |
+| `bun run types`                                       | Regenerate Worker types after configuration changes.                                                 |
 | `bun --env-file=backend/.dev.vars run db:maintenance` | Remove expired sessions/login counters and old unreferenced uploads; mark interrupted sends unknown. |
 
 Integration tests use isolated in-memory libSQL fixtures, not your configured cloud database. Browser verification scenarios are documented in the [end-to-end checklist](frontend/tests/e2e/README.md).
@@ -140,13 +138,12 @@ The reset command reads `backend/.dev.vars` directly and requires a Turso Cloud 
 backend/
   contracts/       Shared schemas and RPC types
   docs/            Architecture and operations
-  email-routing/   Independently deployed inbound receiver
   migrations/      Numbered SQL migrations
   scripts/         Development, database, and maintenance tools
   src/
     modules/       Identity, organizations, domains, mailboxes, mail, audit
     platform/      Database, security, email, and logging adapters
-    transport/     RPC dispatch and inbound HTTP handling
+    transport/     RPC dispatch and inbound email handling
   tests/           Integration fixtures and runtime checks
 frontend/
   docs/            Experience and interaction design
@@ -179,18 +176,11 @@ See the [operations guide](backend/docs/operations.md) for the full procedure, s
 
 5. Complete `/instance/setup` immediately. First-run setup is intentionally public until the initial administrator is created.
 6. Enable [Cloudflare Email Sending](https://developers.cloudflare.com/email-service/api/send-emails/workers-api/), onboard your sender domains, and publish the supplied SPF/DKIM records and your DMARC policy. Change `SEND_MODE` to `live` and redeploy when ready.
-7. Set the receiver’s `INBOUND_URL`, then deploy it:
-
-   ```sh
-   bun run deploy:receiver
-   ```
-
-8. Configure [Email Routing](https://developers.cloudflare.com/email-service/api/route-emails/email-handler/), publish its MX records, and point address rules or a catch-all rule at `flaremail-receiver`. Mark the domain ready in Flaremail after completing the external setup.
-9. Verify inbound and outbound delivery using real addresses you control. A successful build or simulated send does not establish live delivery.
+7. Configure [Email Routing](https://developers.cloudflare.com/email-service/configuration/email-routing-addresses/), publish its MX records, and point the address rules or catch-all rule at `flaremail`. Mark the domain ready in Flaremail after completing the external setup.
+8. Verify inbound and outbound delivery using real addresses you control.
 
 ### Operational boundaries
 
-- **Inbound HTTP is public.** `/api/webhooks/inbound` intentionally has no authentication. It validates envelope metadata, message size, recipient availability, and domain readiness, but it does not authenticate the caller as Cloudflare.
 - **Messages have a 5 MiB application limit.** Binary storage and transfers use chunking; this does not remove message-size limits.
 - **Provider acceptance is not delivery.** Check Cloudflare delivery logs for bounces or later failures. Unknown send outcomes require deliberate operator reconciliation, not an automatic resend.
 - **Maintenance is explicit.** Schedule `db:maintenance` against the intended database. It does not delete messages or automatically empty Trash.

@@ -4,7 +4,7 @@
 
 Vite serves the Svelte SPA and Hono Worker on one origin. The exact same Worker entrypoint, Hono application, authorization policies, and Turso web client run locally and in production. Only environment values and provider simulation versus live sending change. CLI tools are not HTTP request paths; they also use Turso’s web client.
 
-The receiving Worker is independently deployed and has no database access. Email Routing invokes its `email()` handler; it forwards raw MIME and envelope metadata to the main app’s HTTP webhook.
+Cloudflare Email Routing invokes the application Worker’s `email()` handler with raw MIME and the SMTP envelope. The handler writes mail to Turso through the same ingestion service used in tests. Live outbound mail uses the Worker’s `EMAIL` binding.
 
 ## Boundaries
 
@@ -22,7 +22,7 @@ The receiving Worker is independently deployed and has no database access. Email
 
 Requests support IDs, notifications, and batches of up to 50 operations. Batches run in order. Notifications return no RPC response; all-notification requests return HTTP 204. Invalid CBOR, envelopes, methods, and parameters use standard JSON-RPC codes. Application errors have a stable `error.data.kind`. Mutations are forbidden at the query endpoint, and the SDK never retries them automatically.
 
-All application operations—including login, drafts, attachment transfers, and administration—use these endpoints. The inbound webhook is the deliberate exception.
+The browser uses these endpoints for login, drafts, attachment transfers, and administration.
 
 ## Identity and authorization
 

@@ -8,7 +8,6 @@ import { createSender } from "./platform/email/sender";
 import type { Sender } from "./platform/email/sender";
 import type { AppEnvironment, RequestContext } from "./transport/rpc/context";
 import { dispatchRpc } from "./transport/rpc/dispatch";
-import { receiveInboundEmail } from "./transport/inbound/handler";
 import { logEvent } from "./platform/observability/log";
 
 export function createApp(overrides: { database?: Database; sender?: Sender } = {}) {
@@ -73,9 +72,6 @@ export function createApp(overrides: { database?: Database; sender?: Sender } = 
 			client?.close();
 		}
 	});
-	app.post("/api/webhooks/inbound", (context) =>
-		receiveInboundEmail(context.req.raw, context.get("requestContext").database),
-	);
 	app.post("/api/:endpoint", async (context) => {
 		const endpoint = context.req.param("endpoint");
 

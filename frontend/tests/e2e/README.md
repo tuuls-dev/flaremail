@@ -9,7 +9,7 @@ Use an isolated database and `SEND_MODE=simulate`. Never run setup or seeded mai
 1. With migrations applied and no instance record, open `/instance/setup` without cookies or credentials. Create an administrator; verify the session and redirect to administration. Revisit setup and verify it cannot create a second admin.
 2. Create an organization, add a domain, inspect its manual setup checklist, and mark it ready for simulation. Create a mailbox. Confirm it has no implicit access, then grant the administrator access explicitly.
 3. Create a second organization and switch between them. Verify the organization heading, domain list, and actions use the same scope; open forms must not survive a scope change.
-4. Submit fixtures through `/api/webhooks/inbound` or `SEED_MAILBOX=hello@example.com bun demo:seed`. Return to mail and verify list/detail navigation and unread state.
+4. With the local Vite server running, submit fixtures through its email simulator with `SEED_MAILBOX=hello@example.com bun demo:seed`. Return to mail and verify list/detail navigation and unread state.
 5. Press `C`, enter recipients, subject, and rich content. Save and reopen the draft. Verify content survives navigation/reload.
 6. Choose a real file. Verify it appears only after upload completes, draft saving finishes, and the attachment remains when reopening the draft. Send through simulation; verify a Sent copy and attachment are present, and the draft disappears.
 7. Search for sender, subject, and body text. Verify clearing search restores the previous mailbox context.
