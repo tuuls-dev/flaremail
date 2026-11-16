@@ -1,6 +1,7 @@
 {
 	"name": "flaremail",
 	"private": true,
+	"license": "AGPL-3.0-only",
 	"workspaces": [
 		"backend",
 		"backend/contracts",
@@ -20,8 +21,8 @@
 		"test": "bun test backend frontend/src",
 		"lint": "bun oxlint && bun oxfmt --check && bun check",
 		"format": "oxfmt",
-		"types": "wrangler types backend/worker-configuration.d.ts --config backend/wrangler.jsonc --env-interface BackendEnv --strict-vars false",
-		"deploy": "bun run build && wrangler deploy --config dist/flaremail/wrangler.json",
+		"types": "wrangler types backend/worker-configuration.d.ts --config wrangler.jsonc --env-interface BackendEnv --strict-vars false",
+		"deploy": "bun run build && wrangler deploy --config dist/worker/wrangler.json",
 		"test:runtime": "bun backend/tests/runtime/smoke.ts"
 	},
 	"devDependencies": {
@@ -36,5 +37,16 @@
 		"typescript": "^6.0.3",
 		"vite": "^8.3.4",
 		"wrangler": "^4.151.2"
+	},
+	"packageManager": "bun@1.4.4",
+	"cloudflare": {
+		"bindings": {
+			"TURSO_DATABASE_URL": {
+				"description": "The libSQL URL of the Turso database you migrated and initialized for this instance."
+			},
+			"TURSO_AUTH_TOKEN": {
+				"description": "A database-scoped Turso token with read and write access to that database."
+			}
+		}
 	}
 }

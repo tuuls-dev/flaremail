@@ -47,37 +47,35 @@ Local development runs the same application Worker and database client as produc
 
 ### 1. Prepare your environment
 
-You’ll need [Bun](https://bun.sh/docs/installation) and a dedicated **Turso Cloud development database** with an auth token. Local development still connects to Turso Cloud; it does not start an on-disk database. Cloudflare mail configuration is only needed when you’re ready for real delivery.
+You’ll need [Bun 1.4.4](https://bun.com/docs/installation), Node.js 22.12 or later, and a dedicated **Turso Cloud development database** with an auth token. Local development still connects to Turso Cloud; it does not start an on-disk database. Cloudflare mail configuration is only needed when you’re ready for real delivery.
 
 ```sh
 git clone https://github.com/tuuls-dev/flaremail.git
 cd flaremail
-bun install
-cp backend/.dev.vars.example backend/.dev.vars
+bun install --frozen-lockfile
+cp .dev.vars.example .dev.vars
 ```
 
-Edit `backend/.dev.vars`:
+Edit the root `.dev.vars`:
 
 ```dotenv
 TURSO_DATABASE_URL=libsql://your-development-database.turso.io
 TURSO_AUTH_TOKEN=your-development-database-token
-APP_ORIGIN=http://127.0.0.1:5173
-SEND_MODE=simulate
 ```
 
-This file is ignored by Git. Use a separate database and token for production.
+This file is ignored by Git. If you already have `backend/.dev.vars`, move it to the repository root. Use a separate database and token for production.
 
 ### 2. Start the app
 
 Run all commands from the repository root:
 
 ```sh
-bun --env-file=backend/.dev.vars run dev
+bun --env-file=.dev.vars run dev
 ```
 
 This applies pending migrations, then starts the frontend and Worker together at **http://127.0.0.1:5173**.
 
-The Vite/Workers runtime loads `backend/.dev.vars` automatically. Bun CLI scripts read `process.env`, so the explicit `--env-file` also gives the migration script those credentials. Use the same flag for other database commands unless you have already exported the intended variables.
+The Vite/Workers runtime loads the root `.dev.vars` automatically. The explicit `--env-file` also gives the Bun migration script those credentials. Use the same flag for other development database commands unless you have already exported the intended variables.
 
 ### 3. Set up your first inbox
 
@@ -97,30 +95,30 @@ Replace the address with your configured mailbox. You can now read, search, comp
 
 ## Configuration
 
-| Setting              | Purpose                                                                                                            |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `TURSO_DATABASE_URL` | Database URL used by the application and database scripts.                                                         |
-| `TURSO_AUTH_TOKEN`   | Database credential. Keep it in local environment files or a Worker secret, never tracked configuration.           |
-| `APP_ORIGIN`         | Exact application origin; defaults to `http://127.0.0.1:5173` in development. Use your HTTPS origin in production. |
-| `SEND_MODE`          | `simulate` stores a Sent copy without external delivery; `live` calls the native email binding.                    |
-| `EMAIL`              | Main Worker’s `send_email` binding, already declared in its Wrangler configuration.                                |
+| Setting              | Purpose                                                                                                               |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `TURSO_DATABASE_URL` | Required Worker secret and database script environment variable. Use the libSQL URL of your database.                 |
+| `TURSO_AUTH_TOKEN`   | Required Worker secret and database script environment variable. Use a database-scoped token.                         |
+| `APP_ORIGIN`         | Optional exact origin for deployments that need an additional allowed origin. An empty value uses the request origin. |
+| `SEND_MODE`          | `simulate` stores a Sent copy without external delivery; `live` calls the native email binding.                       |
+| `EMAIL`              | Main Worker’s `send_email` binding, already declared in its Wrangler configuration.                                   |
 
-Application configuration lives in [`backend/wrangler.jsonc`](backend/wrangler.jsonc). Local overrides belong in `backend/.dev.vars`. The checked-in database URL is a placeholder and must be replaced for deployment.
+Application defaults live in [`wrangler.jsonc`](wrangler.jsonc). Put development secrets in the root `.dev.vars` and supply production secrets through the deployment path you choose.
 
 ## Development
 
-| Command                                               | What it does                                                                                         |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `bun --env-file=backend/.dev.vars run dev`            | Apply migrations and start the one-port development app.                                             |
-| `bun dev:app`                                         | Start Vite/Workers without applying migrations.                                                      |
-| `bun --env-file=backend/.dev.vars run db:migrate`     | Apply pending, checksum-verified SQL migrations.                                                     |
-| `bun lint`                                            | Run linting, formatting checks, import-boundary checks, TypeScript, and Svelte checks.               |
-| `bun check`                                           | Run import-boundary and type checks.                                                                 |
-| `bun test`                                            | Run backend and frontend-source tests.                                                               |
-| `bun run test:runtime`                                | Run read-only protocol smoke checks against the running app.                                         |
-| `bun run build`                                       | Build browser assets and the application Worker.                                                     |
-| `bun run types`                                       | Regenerate Worker types after configuration changes.                                                 |
-| `bun --env-file=backend/.dev.vars run db:maintenance` | Remove expired sessions/login counters and old unreferenced uploads; mark interrupted sends unknown. |
+| Command                                       | What it does                                                                                         |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `bun --env-file=.dev.vars run dev`            | Apply migrations and start the one-port development app.                                             |
+| `bun dev:app`                                 | Start Vite/Workers without applying migrations.                                                      |
+| `bun --env-file=.dev.vars run db:migrate`     | Apply pending, checksum-verified SQL migrations.                                                     |
+| `bun lint`                                    | Run linting, formatting checks, import-boundary checks, TypeScript, and Svelte checks.               |
+| `bun check`                                   | Run import-boundary and type checks.                                                                 |
+| `bun test`                                    | Run backend and frontend-source tests.                                                               |
+| `bun run test:runtime`                        | Run read-only protocol smoke checks against the running app.                                         |
+| `bun run build`                               | Build browser assets and the application Worker.                                                     |
+| `bun run types`                               | Regenerate Worker types after configuration changes.                                                 |
+| `bun --env-file=.dev.vars run db:maintenance` | Remove expired sessions/login counters and old unreferenced uploads; mark interrupted sends unknown. |
 
 Integration tests use isolated in-memory libSQL fixtures, not your configured cloud database. Browser verification scenarios are documented in the [end-to-end checklist](frontend/tests/e2e/README.md).
 
@@ -130,7 +128,7 @@ To **delete all application data** in a disposable development database and reap
 NODE_ENV=development bun db:reset
 ```
 
-The reset command reads `backend/.dev.vars` directly and requires a Turso Cloud database hostname containing a `dev` or `development` name segment. After resetting, complete `/instance/setup` again.
+The reset command reads the root `.dev.vars` directly and requires a Turso Cloud database hostname containing a `dev` or `development` name segment. After resetting, complete `/instance/setup` again.
 
 ### Repository layout
 
@@ -157,27 +155,21 @@ frontend/
 
 ## Deploy
 
-See the [operations guide](backend/docs/operations.md) for the full procedure, send recovery, and maintenance.
+Use **Use this template** on GitHub to start an independent repository, or **Fork** to keep a link to upstream for updates and contributions. The Cloudflare button can also create a repository in your GitHub account. [GitHub template and fork behavior](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
 
-1. Create a separate production Turso database and database-scoped token. Apply migrations with production credentials explicitly supplied to `bun db:migrate`; deployment does not run migrations.
-2. Update `TURSO_DATABASE_URL` and `APP_ORIGIN` in the application Worker configuration. Use an HTTPS custom domain and a paid Worker with an appropriate CPU budget for password hashing.
-3. Authenticate Wrangler and store the database token:
+Before deploying, follow the [production database setup](backend/docs/operations.md#prepare-production) to create your Turso database, apply migrations, and create the first administrator. You’ll also need a Workers Paid account and a domain you control for live mail. [Cloudflare Email Service pricing](https://developers.cloudflare.com/email-service/platform/pricing/)
 
-   ```sh
-   bunx wrangler login
-   bunx wrangler secret put TURSO_AUTH_TOKEN --config backend/wrangler.jsonc
-   ```
+### Deploy with Wrangler
 
-4. Build and deploy the application:
+Clone your fork or template copy, then follow the [Wrangler deployment steps](backend/docs/operations.md#deploy-with-wrangler) to choose a Worker name and upload the Turso secrets with the first deploy.
 
-   ```sh
-   bun run deploy
-   ```
+### Deploy from the Cloudflare dashboard
 
-5. Complete `/instance/setup` immediately. First-run setup is intentionally public until the initial administrator is created.
-6. Enable [Cloudflare Email Sending](https://developers.cloudflare.com/email-service/api/send-emails/workers-api/), onboard your sender domains, and publish the supplied SPF/DKIM records and your DMARC policy. Change `SEND_MODE` to `live` and redeploy when ready.
-7. Configure [Email Routing](https://developers.cloudflare.com/email-service/configuration/email-routing-addresses/), publish its MX records, and point the address rules or catch-all rule at `flaremail`. Mark the domain ready in Flaremail after completing the external setup.
-8. Verify inbound and outbound delivery using real addresses you control.
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tuuls-dev/flaremail)
+
+The button creates a GitHub copy and deploys a Worker in your Cloudflare account. Have the initialized Turso database URL and token ready before you click it. See the [dashboard deployment steps](backend/docs/operations.md#deploy-from-the-cloudflare-dashboard) for Workers Builds settings and secret placement.
+
+After either deployment, follow the [mail setup guide](backend/docs/operations.md#cloudflare-email) to configure sending, routing, and DNS for your domain and verify delivery to your first mailbox.
 
 ### Operational boundaries
 
@@ -200,4 +192,4 @@ Follow [AGENTS.md](AGENTS.md): use verb-led function names and meaningful variab
 
 ## License
 
-No license file is currently included in this repository.
+Flaremail is licensed under the [GNU Affero General Public License v3.0 only](LICENSE). If you deploy a modified version, prominently offer its users the corresponding source for the version they use, at no charge. For example, link to the matching source release or archive from the sign-in page. [AGPL-3.0-only, section 13](https://spdx.org/licenses/AGPL-3.0-only.html#licenseText)

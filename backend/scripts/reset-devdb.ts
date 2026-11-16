@@ -10,7 +10,7 @@ export function parseDevelopmentDatabaseConfiguration(
 ) {
 	if (!nodeEnvironment || nodeEnvironment === "production") {
 		throw new Error(
-			"Refusing to reset a database in unknown environment mode. set NODE_ENV=development first.",
+			"Refusing to reset a database in production mode or with NODE_ENV unset. Set NODE_ENV=development first.",
 		);
 	}
 
@@ -19,7 +19,7 @@ export function parseDevelopmentDatabaseConfiguration(
 	const authToken = configuration.TURSO_AUTH_TOKEN;
 
 	if (!databaseUrl || !authToken) {
-		throw new Error("Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in backend/.dev.vars first.");
+		throw new Error("Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in the root .dev.vars first.");
 	}
 
 	const parsedUrl = new URL(databaseUrl);
@@ -30,7 +30,7 @@ export function parseDevelopmentDatabaseConfiguration(
 
 	if (!usesTursoCloud || !usesSecureTransport || !namesDevelopmentDatabase) {
 		throw new Error(
-			"Refusing to reset: backend/.dev.vars must target a Turso Cloud database with dev or development in its name.",
+			"Refusing to reset: .dev.vars must target a Turso Cloud database with dev or development in its name.",
 		);
 	}
 
@@ -110,7 +110,7 @@ export async function resetDatabase(database: Client) {
 }
 
 if (import.meta.main) {
-	const configurationFile = new URL("../.dev.vars", import.meta.url);
+	const configurationFile = new URL("../../.dev.vars", import.meta.url);
 	const configurationText = await Bun.file(configurationFile).text();
 	const configuration = parseDevelopmentDatabaseConfiguration(
 		configurationText,

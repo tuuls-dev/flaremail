@@ -22,16 +22,22 @@ describe("development database reset", () => {
 		expect(() =>
 			parseDevelopmentDatabaseConfiguration(developmentConfiguration, "production"),
 		).toThrow("production mode");
+		expect(() => parseDevelopmentDatabaseConfiguration(developmentConfiguration)).toThrow(
+			"NODE_ENV unset",
+		);
 		const productionConfiguration = developmentConfiguration.replace("development", "production");
-		expect(() => parseDevelopmentDatabaseConfiguration(productionConfiguration)).toThrow(
-			"Refusing to reset",
-		);
-		const untrustedConfiguration = developmentConfiguration.replace(".turso.io", ".example.com");
-		expect(() => parseDevelopmentDatabaseConfiguration(untrustedConfiguration)).toThrow(
-			"Refusing to reset",
-		);
 		expect(() =>
-			parseDevelopmentDatabaseConfiguration("TURSO_DATABASE_URL=libsql://dev.turso.io"),
+			parseDevelopmentDatabaseConfiguration(productionConfiguration, "development"),
+		).toThrow("dev or development in its name");
+		const untrustedConfiguration = developmentConfiguration.replace(".turso.io", ".example.com");
+		expect(() =>
+			parseDevelopmentDatabaseConfiguration(untrustedConfiguration, "development"),
+		).toThrow("Refusing to reset");
+		expect(() =>
+			parseDevelopmentDatabaseConfiguration(
+				"TURSO_DATABASE_URL=libsql://dev.turso.io",
+				"development",
+			),
 		).toThrow("TURSO_AUTH_TOKEN");
 	});
 	it("removes linked data, rebuilds the current schema, and makes public setup available again", async () => {
