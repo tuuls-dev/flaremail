@@ -30,7 +30,7 @@
 					role: "textbox",
 					"aria-label": "Message body",
 					"aria-multiline": "true",
-					"data-placeholder": "Write something thoughtful…",
+					"data-placeholder": "Write a message…",
 				},
 			},
 			onUpdate: ({ editor: activeEditor }) =>
@@ -166,7 +166,7 @@
 		outline: none;
 	}
 	.editor-body :global(.tiptap p:only-child:has(br:only-child)::before) {
-		content: "Write something thoughtful…";
+		content: "Write a message…";
 		color: var(--color-faint);
 		pointer-events: none;
 		float: left;

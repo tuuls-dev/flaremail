@@ -12,9 +12,6 @@
 			></a
 		>
 		<div class="intro">
-			<span class="eyebrow">A quieter kind of inbox</span>
-			<h1>Your mail.<br />Your space.</h1>
-			<p>A thoughtful place for conversations.<br />Built for your team. Run on your terms.</p>
 			<div class="illustration" aria-hidden="true">
 				<div class="illustration-top"><i></i><i></i><i></i></div>
 				<div class="illustration-row">
@@ -29,10 +26,8 @@
 				<div class="illustration-row">
 					<span class="mini-avatar peach"></span><span><b></b><em></em></span>
 				</div>
-				<div class="floating-note"><Icon name="checks" size={16} /> A little more clarity.</div>
 			</div>
 		</div>
-		<footer><span>Made for focus, not noise.</span><span>Self-hosted. Always yours.</span></footer>
 	</aside>
 	<main>{@render children()}</main>
 </div>
@@ -68,22 +63,8 @@
 		margin: auto 0;
 		padding: 48px 0;
 	}
-	.intro .eyebrow {
-		color: #7779a4;
-	}
-	.intro h1 {
-		font-size: clamp(40px, 5vw, 68px);
-		letter-spacing: -3px;
-		font-weight: 550;
-		margin: 18px 0 22px;
-		line-height: 1.1;
-	}
-	.intro p {
-		color: #7b7d99;
-		line-height: 1.8;
-	}
 	.illustration {
-		margin: 48px 0 20px;
+		margin: 0;
 		background: #ffffffbc;
 		border: 1px solid #fff;
 		border-radius: 14px;
@@ -141,27 +122,6 @@
 		height: 4px;
 		background: #eff0f4;
 	}
-	.floating-note {
-		position: absolute;
-		right: -24px;
-		bottom: -8px;
-		display: flex;
-		gap: 8px;
-		align-items: center;
-		background: white;
-		padding: 12px 18px;
-		border-radius: 10px;
-		box-shadow: 0 4px 24px #3333510e;
-		font-size: 11px;
-		transform: rotate(6deg);
-	}
-	footer {
-		display: flex;
-		justify-content: space-between;
-		font-size: 10px;
-		color: #9192af;
-		gap: 12px;
-	}
 	main {
 		display: flex;
 		align-items: center;
@@ -171,13 +131,13 @@
 	@media (max-width: 800px) {
 		.auth-layout {
 			grid-template-columns: 1fr;
+			grid-template-rows: auto 1fr;
 		}
 		aside {
 			padding: 24px;
 			background: var(--color-bg);
 		}
-		.intro,
-		footer {
+		.intro {
 			display: none;
 		}
 		main {

@@ -122,7 +122,6 @@
 			<p>{errorMessage}</p>
 		</div>{:else if messages.length}<div class="conversation-scroll">
 			<div class="subject-heading">
-				<span class="eyebrow">The conversation</span>
 				<h1>{subject}</h1>
 				<span class="message-count"
 					>{messages.length} {messages.length === 1 ? "message" : "messages"}</span
@@ -205,13 +204,11 @@
 					><Icon name="forward" size={16} />Forward</button
 				>
 			</div>
-			<div class="end-note"><span></span>All caught up in this conversation<span></span></div>
 		</div>
 	{:else}<div class="reader-state empty-reader">
 			<div class="empty-reader-art">
 				<Icon name="mailOpen" size={42} /><span class="small-spark">✦</span>
 			</div>
-			<h2>A little room to focus.</h2>
 			<p>Choose a conversation to read it here.</p>
 			<div class="reader-shortcuts">
 				<span><kbd>J</kbd> <kbd>K</kbd> move</span><span><kbd>↵</kbd> open</span><span
@@ -265,10 +262,6 @@
 	}
 	.subject-heading {
 		margin-bottom: 34px;
-	}
-	.subject-heading .eyebrow {
-		font-size: 9px;
-		color: var(--color-faint);
 	}
 	.subject-heading h1 {
 		font-size: 23px;
@@ -426,20 +419,6 @@
 	.reply-actions kbd {
 		margin-left: 8px;
 	}
-	.end-note {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 12px;
-		font-size: 9px;
-		color: var(--color-faint);
-		margin: 50px 0 20px;
-	}
-	.end-note span {
-		height: 1px;
-		width: 36px;
-		background: var(--color-border);
-	}
 	.reader-state {
 		flex: 1;
 		display: flex;
@@ -458,13 +437,6 @@
 	}
 	.empty-reader {
 		background: radial-gradient(ellipse at 50% 40%, var(--color-surface-subtle), transparent 60%);
-	}
-	.empty-reader h2 {
-		font-size: 19px;
-		font-weight: 500;
-		color: var(--color-text);
-		margin: 10px 0 -8px;
-		letter-spacing: -0.5px;
 	}
 	.empty-reader-art {
 		width: 110px;

@@ -73,7 +73,6 @@
 	<header>
 		<div>
 			<h2>People</h2>
-			<p>The right access, for the right people.</p>
 		</div>
 		<button
 			class="button small"
@@ -161,7 +160,7 @@
 </section>
 <Dialog
 	bind:open={memberOpen}
-	title="Add someone to your team"
+	title="Add member"
 	description="Organization membership doesn’t grant mailbox access. Assign mailboxes separately."
 	><form class="form-stack" onsubmit={addMember}>
 		<div class="mode-switch">
@@ -236,11 +235,6 @@
 	h2 {
 		font-size: 15px;
 		margin: 0 0 4px;
-	}
-	header p {
-		font-size: 12px;
-		color: var(--color-muted);
-		margin: 0;
 	}
 	.member-row {
 		display: flex;

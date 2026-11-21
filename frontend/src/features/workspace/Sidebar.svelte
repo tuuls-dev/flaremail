@@ -123,7 +123,7 @@
 					: "#"}
 				class:active={labelId === label.id}
 				><span class="label-dot" style:background={label.color}></span><span>{label.name}</span></a
-			>{:else}<p class="no-labels">A little order, your way.</p>{/each}
+			>{/each}
 	</nav>
 	<div class="sidebar-bottom">
 		<button class="shortcut-button" onclick={onhelp}
@@ -314,11 +314,6 @@
 		height: 7px;
 		border-radius: 2px;
 		margin: 0 5px;
-	}
-	.no-labels {
-		font-size: 10px;
-		color: var(--color-faint);
-		padding: 7px 12px;
 	}
 	.sidebar-bottom {
 		margin-top: auto;

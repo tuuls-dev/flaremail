@@ -29,8 +29,7 @@
 <AuthLayout
 	><div class="login">
 		<p class="eyebrow">{authState.instance.name}</p>
-		<h1>A good place to return to.</h1>
-		<p class="lead">Sign in to pick up the conversation.</p>
+		<h1>Sign in</h1>
 		<form class="form-stack" onsubmit={signIn}>
 			<label class="field"
 				>Email address<input
@@ -51,10 +50,7 @@
 			>{#if errorMessage}<div class="form-error" role="alert">{errorMessage}</div>{/if}<button
 				class="button primary submit"
 				disabled={submitting}
-				>{submitting ? "Signing in…" : "Sign in to your workspace"}<Icon
-					name="arrowUpRight"
-					size={16}
-				/></button
+				>{submitting ? "Signing in…" : "Sign in"}<Icon name="arrowUpRight" size={16} /></button
 			>
 		</form>
 		<p class="help">
@@ -70,12 +66,7 @@
 	}
 	.login h1 {
 		font-size: 29px;
-		margin: 16px 0 12px;
-	}
-	.lead {
-		color: var(--color-muted);
-		font-size: 13px;
-		margin-bottom: 32px;
+		margin: 16px 0 32px;
 	}
 	.submit {
 		min-height: 44px;
