@@ -99,9 +99,7 @@
 <UtilityLayout title="Administration" section="admin"
 	><div class="page-heading">
 		<div>
-			<p class="eyebrow">A little behind the scenes</p>
 			<h1>Administration</h1>
-			<p class="muted">A well-organized home for your team’s mail.</p>
 		</div>
 		{#if authState.session?.user.instanceAdmin}<button
 				class="button primary"
@@ -217,26 +215,21 @@
 	{:else if workspaceLoaded}<div class="empty-org">
 			<span class="empty-icon"><Icon name="building" size={32} /></span>
 			<h2>
-				{authState.session?.user.instanceAdmin
-					? "Start with an organization."
-					: "No organizations to manage."}
+				{authState.session?.user.instanceAdmin ? "No organizations" : "No organizations to manage"}
 			</h2>
 			<p>
 				{authState.session?.user.instanceAdmin
-					? "An organization brings your people, domains, and mailboxes together. Create one for your company, a project, or just yourself."
-					: "Organization administrator access is required to use this space."}
+					? "Create an organization to manage domains, members, and mailboxes."
+					: "Organization administrator access is required."}
 			</p>
 			{#if authState.session?.user.instanceAdmin}<button
 					class="button primary"
 					onclick={() => (createOpen = true)}
-					>Create your first organization <Icon name="arrowUpRight" size={16} /></button
+					>Create organization <Icon name="arrowUpRight" size={16} /></button
 				>{/if}
 		</div>{/if}
 </UtilityLayout>
-<Dialog
-	bind:open={createOpen}
-	title="Create an organization"
-	description="A separate space for a team, company, or project. You’ll manage its domains and people here."
+<Dialog bind:open={createOpen} title="Create an organization"
 	><form class="form-stack" onsubmit={createOrganization}>
 		<label class="field"
 			>Organization name<input
@@ -274,13 +267,6 @@
 	}
 	.page-heading h1 {
 		margin: 10px 0;
-	}
-	.page-heading p {
-		margin-bottom: 0;
-		font-size: 12px;
-	}
-	.page-heading .eyebrow {
-		font-size: 10px;
 	}
 	.org-bar {
 		display: flex;

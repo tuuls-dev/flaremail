@@ -57,14 +57,13 @@
 	<header>
 		<div>
 			<h2>Domains</h2>
-			<p>Addresses that make your team feel at home.</p>
 		</div>
 		<button class="button small" onclick={() => (createOpen = true)}
 			><Icon name="plus" size={15} />Add domain</button
 		>
 	</header>
 	{#if !domains.length}<div class="empty">
-			<Icon name="globe" size={28} /><strong>A domain of your own</strong>
+			<Icon name="globe" size={28} /><strong>No domains</strong>
 			<p>Add a domain, configure it in Cloudflare, then create your mailboxes.</p>
 		</div>{:else}<div class="domain-list">
 			{#each domains as domain (domain.id)}<div class="domain-row">
@@ -179,11 +178,6 @@
 	h2 {
 		font-size: 15px;
 		margin: 0 0 4px;
-	}
-	header p {
-		font-size: 12px;
-		color: var(--color-muted);
-		margin: 0;
 	}
 	.empty {
 		padding: 40px;

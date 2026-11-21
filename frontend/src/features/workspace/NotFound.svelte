@@ -1,7 +1,7 @@
 <div class="not-found">
-	<h1>This page wandered off.</h1>
+	<h1>Page not found</h1>
 	<p class="muted">The link may have changed, or the page no longer exists.</p>
-	<a class="button primary" href="/">Back to your workspace</a>
+	<a class="button primary" href="/">Back to workspace</a>
 </div>
 
 <style>

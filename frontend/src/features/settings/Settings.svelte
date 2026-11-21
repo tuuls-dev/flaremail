@@ -48,13 +48,9 @@
 <svelte:head><title>Account settings · Flaremail</title></svelte:head>
 <UtilityLayout title="Account settings"
 	><div class="settings">
-		<p class="eyebrow">Make it yours</p>
 		<h1>Account settings</h1>
-		<p class="muted">The details and preferences that make this space your own.</p>
 		{#if authState.session?.user.mustChangePassword}<div class="notice">
-				<Icon name="key" /><span
-					>One quick step before your inbox: replace your temporary password below.</span
-				>
+				<Icon name="key" /><span>Replace your temporary password to access your mailbox.</span>
 			</div>{/if}
 		<section>
 			<div class="section-title">
@@ -116,7 +112,6 @@
 				<Icon name="sun" />
 				<h2>Appearance</h2>
 			</div>
-			<p class="caption">Choose the light that feels right.</p>
 			<div class="themes">
 				<button class="theme-option" onclick={() => setTheme("light")}
 					><span class="theme-preview light"><i></i><b></b></span><span
@@ -138,9 +133,6 @@
 	}
 	.settings > h1 {
 		margin: 12px 0;
-	}
-	.settings > p.muted {
-		font-size: 13px;
 	}
 	.notice {
 		display: flex;

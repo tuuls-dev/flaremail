@@ -134,7 +134,7 @@
 <svelte:window onkeydown={handleSendShortcut} />
 <Dialog
 	bind:open
-	title={model.replyToMessageId ? "Continue the conversation" : "New message"}
+	title={model.replyToMessageId ? "Reply" : "New message"}
 	wide
 	preventClose={busy}
 	onrequestclose={() => {

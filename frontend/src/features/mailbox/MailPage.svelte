@@ -339,7 +339,7 @@
 					>{/if}
 			</form>
 			<div class="topbar-right">
-				<span class="privacy-note"><span></span>Your mail. Your space.</span><button
+				<button
 					class="icon-button"
 					aria-label="Keyboard shortcut help"
 					onclick={() => (helpOpen = true)}><Icon name="help" size={17} /></button
@@ -354,9 +354,7 @@
 					<div>
 						<h1>{heading}<span>{folder === "drafts" ? model.drafts.length : model.total}</span></h1>
 						<p>
-							{searchQuery
-								? `Results for “${searchQuery}”`
-								: mailbox?.name || "Your conversations, all together."}
+							{searchQuery ? `Results for “${searchQuery}”` : (mailbox?.name ?? "")}
 						</p>
 					</div>
 					<button
@@ -455,7 +453,7 @@
 								><span class="draft-icon"><Icon name="draft" size={18} /></span><span
 									><b>{draft.subject || "Untitled draft"}</b><small
 										>{draft.to.join(", ") || "No recipients yet"}</small
-									><em>{draft.text || "An idea waiting to be finished."}</em></span
+									><em>{draft.text}</em></span
 								><time
 									>{new Date(draft.updatedAt).toLocaleDateString([], {
 										month: "short",
@@ -464,9 +462,8 @@
 								></button
 							>{:else}<div class="list-empty">
 								<Icon name="draft" size={34} />
-								<h2>A space for unfinished thoughts.</h2>
-								<p>Your saved drafts will be waiting here.</p>
-								<button class="button small" onclick={openCompose}>Write something</button>
+								<h2>No drafts</h2>
+								<button class="button small" onclick={openCompose}>Compose</button>
 							</div>{/each}{:else}{#each model.items as message, index (message.threadId)}<MessageRow
 								{message}
 								href={buildConversationHref(message.threadId)}
@@ -483,24 +480,19 @@
 								<span class="empty-inbox-icon"
 									><Icon name={searchQuery ? "search" : "inbox"} size={32} /></span
 								>
-								<h2>{searchQuery ? "No conversations found." : "A little breathing room."}</h2>
-								<p>
-									{searchQuery
-										? "Try a different name, subject, or phrase."
-										: folder === "trash"
-											? "Nothing in the trash."
-											: "When conversations arrive, they’ll appear here."}
-								</p>
-								{#if !searchQuery}<button class="button small" onclick={openCompose}
-										>Start a conversation</button
+								<h2>{searchQuery ? "No conversations found" : "No conversations"}</h2>
+								{#if searchQuery}<p>Try a different name, subject, or phrase.</p>{/if}
+								{#if !searchQuery}<button class="button small" onclick={openCompose}>Compose</button
 									>{/if}
 							</div>{/each}{/if}
 				</div>
 				<div class="list-footer">
 					<span
-						>{model.total
-							? `${model.offset + 1}–${Math.min(model.offset + 40, model.total)} of ${model.total}`
-							: "You’re all caught up"}</span
+						>{folder === "drafts"
+							? `${model.drafts.length} ${model.drafts.length === 1 ? "draft" : "drafts"}`
+							: model.total
+								? `${model.offset + 1}–${Math.min(model.offset + 40, model.total)} of ${model.total}`
+								: "0 conversations"}</span
 					>
 					<div>
 						<button
@@ -554,7 +546,7 @@
 		/>{/key}{/if}
 <Dialog
 	bind:open={helpOpen}
-	title="A little faster, a little easier."
+	title="Keyboard shortcuts"
 	description="Keyboard shortcuts work outside text fields. Every action is also available with a pointer."
 	><div class="shortcut-list">
 		{#each shortcuts as shortcut}<div>
@@ -566,7 +558,7 @@
 >
 <Dialog
 	bind:open={labelOpen}
-	title="A little order, your way."
+	title="Create label"
 	description="Create a label to group related conversations in this mailbox."
 	><form class="form-stack" onsubmit={createLabel}>
 		<label class="field"
@@ -574,7 +566,7 @@
 				bind:value={labelName}
 				required
 				maxlength="100"
-				placeholder="Projects, receipts, the good stuff…"
+				placeholder="Projects, receipts"
 			/></label
 		><label class="field">Color<input type="color" bind:value={labelColor} /></label
 		>{#if labelError}<div class="form-error">{labelError}</div>{/if}
@@ -676,21 +668,6 @@
 		align-items: center;
 		gap: 7px;
 		margin-left: auto;
-	}
-	.privacy-note {
-		display: flex;
-		align-items: center;
-		gap: 7px;
-		color: var(--color-faint);
-		font-size: 9px;
-		white-space: nowrap;
-		margin-right: 16px;
-	}
-	.privacy-note > span {
-		width: 5px;
-		height: 5px;
-		background: #8bb59d;
-		border-radius: 50%;
 	}
 	.mail-content {
 		flex: 1;
@@ -994,9 +971,6 @@
 			display: block;
 		}
 		.conversation-open .message-list {
-			display: none;
-		}
-		.privacy-note {
 			display: none;
 		}
 		.message-list {

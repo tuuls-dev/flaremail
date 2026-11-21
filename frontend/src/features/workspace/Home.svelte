@@ -22,20 +22,19 @@
 	const destination = openWorkspace();
 </script>
 
-<UtilityLayout title="Welcome"
+<UtilityLayout title="Workspace"
 	><svelte:boundary>
 		{#if !(await destination).mailboxes.length}<div class="empty-workspace">
 				<div class="welcome-icon"><Icon name="inbox" size={34} /></div>
-				<span class="eyebrow">A fresh start</span>
-				<h1>Your workspace is taking shape.</h1>
+				<h1>No mailboxes</h1>
 				<p>
 					{authState.session?.user.instanceAdmin
-						? "Create your first organization, add a domain, then give your team a place to talk."
+						? "Create an organization, add a domain, then create a mailbox."
 						: "You don’t have access to a mailbox yet. Your organization administrator can assign one to you."}
 				</p>
 				{#if authState.session?.user.instanceAdmin || (await workspace).organizations.some((organization) => organization.role === "admin")}<a
 						class="button primary"
-						href="/admin">Set up your workspace <Icon name="arrowUpRight" size={16} /></a
+						href="/admin">Set up workspace <Icon name="arrowUpRight" size={16} /></a
 					>{/if}
 				<div class="steps">
 					<span><b>01</b>Organization</span><Icon name="chevronRight" size={14} /><span

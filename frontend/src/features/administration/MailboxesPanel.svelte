@@ -128,7 +128,6 @@
 	<header>
 		<div>
 			<h2>Mailboxes</h2>
-			<p>Personal inboxes or a shared place for your team.</p>
 		</div>
 		<button
 			class="button small"
@@ -141,7 +140,7 @@
 		>
 	</header>
 	{#if !mailboxes.length}<div class="empty">
-			<Icon name="inbox" size={28} /><strong>A place for every conversation</strong>
+			<Icon name="inbox" size={28} /><strong>No mailboxes</strong>
 			<p>
 				{domains.length
 					? "Create a mailbox, then assign the people who can read and send from it."
@@ -274,11 +273,6 @@
 	h2 {
 		font-size: 15px;
 		margin: 0 0 4px;
-	}
-	header p {
-		font-size: 12px;
-		color: var(--color-muted);
-		margin: 0;
 	}
 	.empty {
 		padding: 40px;

@@ -40,17 +40,13 @@
 		{#if authState.instance.initialized}<span class="setup-icon"
 				><Icon name="checkCircle" size={25} /></span
 			>
-			<h1>You’re all set.</h1>
-			<p class="muted">This instance has already been initialized.</p>
+			<h1>Instance already initialized</h1>
 			<a class="button primary" href={authState.session ? "/admin" : "/login"}
 				>Continue <Icon name="arrowUpRight" size={16} /></a
 			>
 		{:else}<span class="setup-icon"><Icon name="shield" size={25} /></span>
-			<p class="eyebrow">Welcome to your new instance</p>
-			<h1>Make yourself at home.</h1>
-			<p class="lead">
-				Name your space and create the first administrator account. Your team’s inbox starts here.
-			</p>
+			<h1>Set up instance</h1>
+			<p class="lead">Name your instance and create the first administrator account.</p>
 			<form class="form-stack" onsubmit={submitSetup}>
 				<label class="field"
 					>Instance name<input
@@ -92,7 +88,7 @@
 				>
 				{#if errorMessage}<div class="form-error" role="alert">{errorMessage}</div>{/if}
 				<button class="button primary submit" disabled={submitting}
-					>{submitting ? "Setting up your space…" : "Create your instance"}<Icon
+					>{submitting ? "Setting up…" : "Create instance"}<Icon
 						name="arrowUpRight"
 						size={17}
 					/></button
@@ -131,9 +127,6 @@
 		font-size: 13px;
 		line-height: 1.8;
 		margin-bottom: 30px;
-	}
-	.setup .eyebrow {
-		margin-bottom: 12px;
 	}
 	.submit {
 		width: 100%;
