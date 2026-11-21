@@ -1,4 +1,5 @@
 import sanitize from "sanitize-html";
+import { emailStyles } from "@flaremail/contracts";
 
 export function sanitizeEmail(html: string) {
 	return sanitize(html, {
@@ -32,13 +33,22 @@ export function sanitizeEmail(html: string) {
 			"th",
 			"hr",
 			"img",
+			"font",
+			"tfoot",
+			"caption",
+			"colgroup",
+			"col",
 		],
 		allowedAttributes: {
+			"*": ["style", "class", "id", "dir", "align"],
 			a: ["href", "title"],
+			font: ["color", "face", "size"],
+			table: ["width", "height", "border", "cellpadding", "cellspacing", "bgcolor"],
 			img: ["src", "alt", "width", "height"],
-			td: ["colspan", "rowspan"],
-			th: ["colspan", "rowspan"],
+			td: ["colspan", "rowspan", "width", "height", "valign", "bgcolor"],
+			th: ["colspan", "rowspan", "width", "height", "valign", "bgcolor"],
 		},
+		allowedStyles: { "*": emailStyles },
 		allowedSchemes: ["http", "https", "mailto", "cid"],
 		allowProtocolRelative: false,
 		transformTags: {

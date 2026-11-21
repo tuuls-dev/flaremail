@@ -317,39 +317,3 @@ kbd {
 		height: 40px;
 	}
 }
-
-/* Typography foundation for the sandboxed email document. The reader embeds this stylesheet without granting script or same-origin access. */
-.email-document {
-	margin: 0;
-	padding: 2px;
-	color: #343746;
-	background: #fff;
-	font:
-		13px/1.85 -apple-system,
-		BlinkMacSystemFont,
-		"Segoe UI",
-		sans-serif;
-	overflow-wrap: anywhere;
-}
-.email-document p {
-	margin: 0 0 16px;
-}
-.email-document a {
-	color: #5555db;
-}
-.email-document img {
-	max-width: 100%;
-	height: auto;
-}
-.email-document blockquote {
-	border-left: 2px solid #ddd;
-	padding-left: 16px;
-	color: #687183;
-}
-.email-document table {
-	max-width: 100%;
-	border-collapse: collapse;
-}
-.email-document pre {
-	white-space: pre-wrap;
-}

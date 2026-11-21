@@ -56,6 +56,11 @@ export class MailboxModel {
 		const changedThread = changedMailbox || this.scope?.threadId !== scope.threadId;
 		this.scope = scope;
 
+		if (changedThread) {
+			this.threadVersion++;
+			this.messages = [];
+		}
+
 		if (changedList) {
 			this.offset = 0;
 			this.selected = [];
@@ -85,15 +90,19 @@ export class MailboxModel {
 			return;
 		}
 
+		if (this.scope !== scope) {
+			return;
+		}
+
 		if (changedThread) {
 			void this.loadConversation(scope);
 		}
 
 		if (changedList) {
-			await this.refreshMailbox(true);
+			await this.refreshMailbox(true, false);
 		}
 	}
-	async refreshMailbox(showLoading = false) {
+	async refreshMailbox(showLoading = false, refreshConversation = true) {
 		const scope = this.scope;
 
 		if (!scope) {
@@ -104,7 +113,7 @@ export class MailboxModel {
 		this.activeController?.abort();
 		const controller = new AbortController();
 		this.activeController = controller;
-		this.loading = this.loading || showLoading;
+		this.loading ||= showLoading;
 		this.refreshing = true;
 		this.errorMessage = "";
 
@@ -140,6 +149,9 @@ export class MailboxModel {
 			this.counts = counts;
 			this.labels = labels;
 			this.drafts = drafts;
+
+			await this.refreshOpenConversation(refreshConversation);
+
 			this.selected = this.selected.filter((threadId) =>
 				this.items.some((item) => item.threadId === threadId),
 			);
@@ -151,6 +163,14 @@ export class MailboxModel {
 				this.refreshing = false;
 			}
 		}
+	}
+	private async refreshOpenConversation(shouldRefresh: boolean) {
+		if (shouldRefresh && this.scope?.threadId) {
+			await this.loadConversation(this.scope, true);
+		}
+	}
+	private isCurrentConversation(version: number, scope: MailScope) {
+		return version === this.threadVersion && this.scope === scope;
 	}
 	private handleRefreshError(error: unknown, signal: AbortSignal) {
 		if (signal.aborted) {
@@ -164,6 +184,8 @@ export class MailboxModel {
 		}
 	}
 	private clearInaccessibleMailbox(message: string) {
+		this.threadVersion++;
+		this.threadLoading = false;
 		this.messages = [];
 		this.items = [];
 		this.drafts = [];
@@ -172,9 +194,13 @@ export class MailboxModel {
 		this.threadError = message;
 		void this.loadWorkspace().catch(() => {});
 	}
-	async loadConversation(scope: MailScope) {
+	async loadConversation(scope: MailScope, preserveMessages = false) {
 		const threadVersion = ++this.threadVersion;
-		this.messages = [];
+
+		if (!preserveMessages) {
+			this.messages = [];
+		}
+
 		this.threadError = "";
 
 		if (!scope.threadId) {
@@ -182,7 +208,7 @@ export class MailboxModel {
 			return;
 		}
 
-		this.threadLoading = true;
+		this.threadLoading = !preserveMessages;
 
 		try {
 			const messages = await query("mail.thread", {
@@ -190,7 +216,7 @@ export class MailboxModel {
 				threadId: scope.threadId,
 			});
 
-			if (threadVersion !== this.threadVersion) {
+			if (!this.isCurrentConversation(threadVersion, scope)) {
 				return;
 			}
 
@@ -201,18 +227,21 @@ export class MailboxModel {
 				unread: false,
 			});
 
-			if (threadVersion === this.threadVersion) {
+			if (this.isCurrentConversation(threadVersion, scope)) {
 				this.items = this.items.map((item) =>
 					item.threadId === scope.threadId ? Object.assign({}, item, { unread: false }) : item,
 				);
-				void this.refreshMailbox();
+
+				if (!preserveMessages) {
+					void this.refreshMailbox(false, false);
+				}
 			}
 		} catch (error) {
-			if (threadVersion === this.threadVersion) {
+			if (this.isCurrentConversation(threadVersion, scope)) {
 				this.threadError = describeError(error);
 			}
 		} finally {
-			if (threadVersion === this.threadVersion) {
+			if (this.isCurrentConversation(threadVersion, scope)) {
 				this.threadLoading = false;
 			}
 		}

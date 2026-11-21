@@ -16,8 +16,8 @@ export async function listMail(database: Database, user: User | null, input: Par
 	const filter = buildListFilter(input);
 	const offset = input.offset ?? 0;
 	const result = await database.execute({
-		sql: `WITH filtered AS (SELECT m.* FROM messages m WHERE ${filter.where}), threads AS (SELECT thread_id,COUNT(*) AS thread_count,MAX(unread) AS any_unread,MAX(starred) AS any_starred FROM filtered GROUP BY thread_id), ranked AS (SELECT f.*,ROW_NUMBER() OVER (PARTITION BY thread_id ORDER BY received_at DESC,id DESC) AS rank FROM filtered f) SELECT r.*,t.thread_count,t.any_unread,t.any_starred,(SELECT COUNT(*) FROM message_attachments a JOIN messages am ON am.id=a.message_id WHERE am.thread_id=r.thread_id AND am.mailbox_id=r.mailbox_id) AS attachment_count FROM ranked r JOIN threads t ON t.thread_id=r.thread_id WHERE r.rank=1 ORDER BY r.received_at DESC,r.id DESC LIMIT 40 OFFSET ?`,
-		args: filter.args.concat(offset),
+		sql: `WITH matching_threads AS (SELECT DISTINCT m.thread_id FROM messages m WHERE ${filter.where}), conversation_messages AS (SELECT m.* FROM messages m JOIN matching_threads mt ON mt.thread_id=m.thread_id WHERE m.mailbox_id=?), threads AS (SELECT thread_id,COUNT(*) AS thread_count,MAX(unread) AS any_unread,MAX(starred) AS any_starred FROM conversation_messages GROUP BY thread_id), ranked AS (SELECT f.*,ROW_NUMBER() OVER (PARTITION BY thread_id ORDER BY received_at DESC,id DESC) AS rank FROM conversation_messages f) SELECT r.*,t.thread_count,t.any_unread,t.any_starred,(SELECT COUNT(*) FROM message_attachments a JOIN messages am ON am.id=a.message_id WHERE am.thread_id=r.thread_id AND am.mailbox_id=r.mailbox_id) AS attachment_count FROM ranked r JOIN threads t ON t.thread_id=r.thread_id WHERE r.rank=1 ORDER BY r.received_at DESC,r.id DESC LIMIT 40 OFFSET ?`,
+		args: filter.args.concat(input.mailboxId, offset),
 	});
 	const total = await findRecord(
 		database,

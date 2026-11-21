@@ -1,12 +1,13 @@
 <script lang="ts">
 	/* eslint-disable no-await-in-loop -- Load inline attachments sequentially to bound memory. */
-	import { onDestroy } from "svelte";
+	import { untrack } from "svelte";
 	import type { Message } from "@flaremail/contracts";
 	import Icon from "../../components/ui/Icon.svelte";
 	import Popover from "../../components/ui/Popover.svelte";
 	import { downloadAttachment, readAttachment, formatFileSize } from "../../sdk/attachments";
 	import { describeError } from "../../sdk/client";
 	import { renderEmailDocument } from "./render-email";
+	import { resizeEmailFrame } from "./resize-email";
 	import { toast } from "svelte-sonner";
 	import { formatShortcut } from "../../keyboard/shortcuts";
 	let {
@@ -31,20 +32,18 @@
 		onunread: () => void;
 	} = $props();
 	let loadRemoteImages = $state(false);
-	let inlineImages = $state<Record<string, string>>({});
+	let inlineImages = $state<Record<string, Record<string, string>>>({});
 	let imageVersion = 0;
 	const subject = $derived.by(() => messages[0]?.subject || "(no subject)");
 
-	async function loadInlineImages() {
+	async function loadInlineImages(message: Message) {
 		const requestVersion = ++imageVersion;
 		const currentMailboxId = mailboxId;
 
 		try {
-			const attachments = messages
-				.flatMap((message) => message.attachments)
-				.filter(
-					(attachment) => attachment.contentId && attachment.contentType.startsWith("image/"),
-				);
+			const attachments = message.attachments.filter(
+				(attachment) => attachment.contentId && attachment.contentType.startsWith("image/"),
+			);
 
 			for (const attachment of attachments) {
 				const file = await readAttachment(currentMailboxId, attachment.id);
@@ -54,10 +53,20 @@
 				}
 
 				const objectUrl = URL.createObjectURL(new Blob([file.bytes], { type: file.contentType }));
-				inlineImages = Object.assign({}, inlineImages, { [attachment.contentId!]: objectUrl });
+				const messageImages = Object.assign({}, inlineImages[message.id]);
+				const previousUrl = messageImages[attachment.contentId!];
+
+				if (previousUrl) {
+					URL.revokeObjectURL(previousUrl);
+				}
+
+				messageImages[attachment.contentId!] = objectUrl;
+				inlineImages = Object.assign({}, inlineImages, { [message.id]: messageImages });
 			}
 		} catch (error) {
-			toast.error(describeError(error));
+			if (requestVersion === imageVersion) {
+				toast.error(describeError(error));
+			}
 		}
 	}
 
@@ -69,12 +78,32 @@
 		}
 	}
 
-	onDestroy(() => {
-		imageVersion++;
+	const imageScope = $derived(
+		JSON.stringify([
+			mailboxId,
+			messages.map((message) => [
+				message.id,
+				message.attachments.map((attachment) => attachment.id),
+			]),
+		]),
+	);
+	$effect(() => {
+		void imageScope;
+		untrack(() => {
+			loadRemoteImages = false;
+		});
 
-		for (const objectUrl of Object.values(inlineImages)) {
-			URL.revokeObjectURL(objectUrl);
-		}
+		return () => {
+			imageVersion++;
+
+			for (const messageImages of Object.values(inlineImages)) {
+				for (const objectUrl of Object.values(messageImages)) {
+					URL.revokeObjectURL(objectUrl);
+				}
+			}
+
+			inlineImages = {};
+		};
 	});
 </script>
 
@@ -166,14 +195,18 @@
 							><button onclick={() => (loadRemoteImages = !loadRemoteImages)}
 								>{loadRemoteImages ? "Hide images" : "Load images"}</button
 							>{#if message.attachments.some((attachment) => attachment.contentId)}<button
-									onclick={loadInlineImages}>Load inline images</button
+									onclick={() => loadInlineImages(message)}>Load inline images</button
 								>{/if}
 						</div>
 						<iframe
 							title={`Message from ${message.sender}`}
-							sandbox="allow-popups allow-popups-to-escape-sandbox"
-							srcdoc={renderEmailDocument(message.html, loadRemoteImages, inlineImages)}
-							style:height={`${Math.min(720, Math.max(250, message.text.split("\n").length * 23 + 70))}px`}
+							sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+							use:resizeEmailFrame
+							srcdoc={renderEmailDocument(
+								message.html,
+								loadRemoteImages,
+								inlineImages[message.id] ?? {},
+							)}
 						></iframe>{:else}<div class="plain-text">
 							{message.text || "This message has no text content."}
 						</div>{/if}
@@ -336,7 +369,8 @@
 		width: 100%;
 		background: white;
 		border-radius: 4px;
-		min-height: 220px;
+		height: 1px;
+		display: block;
 	}
 	.image-notice {
 		display: flex;

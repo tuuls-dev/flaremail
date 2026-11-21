@@ -18,6 +18,15 @@ Use an isolated database and `SEND_MODE=simulate`. Never run setup or seeded mai
 10. Select dark appearance through Settings. At a 390px viewport verify no horizontal overflow, mobile navigation closes after selection, and the floating Compose action opens a full-screen editor.
 11. Inspect browser errors. Incoming script fixtures must not execute; remote image requests remain blocked until explicitly enabled. Inspect the iframe sandbox/CSP when checking hostile fixtures.
 
+## Conversation regressions (issue #4)
+
+- Leave a thread open, send a reply, then deliver another reply. Check the reader after Send, manual Refresh, window focus, and the 15-second poll. Existing content should remain visible during refresh. Close/switch the reader while a response is delayed and verify it cannot repopulate the previous conversation.
+- Check that Inbox, Sent, search, and label results show the full conversation count and newest preview, including sent replies.
+- Deliver two HTML messages that both reference `cid:logo`, with different attachments. Load each message’s inline images; each must retain its own image. Switch conversations while an attachment is loading and verify no image leaks into the next view.
+- Compare a short HTML reply with a body taller than 1,500px. Resize the viewport and load images: frame height should track the body without large blank space or nested vertical scrolling. Expand/collapse quoted history and check that height follows both changes.
+- Verify colored/font-sized signatures and table widths, padding, and alignment survive. Test scripts, event handlers, CSS `url()`, and remote backgrounds: none should execute or load. Remote `<img>` requests must still require consent.
+- Deliver a reply before its parent, siblings before their parent, and a message linking two previously separate reference chains. Verify each chain becomes one conversation, without joining unrelated mail or another mailbox.
+
 Automated coverage lives in `backend/tests/integration/`. `bun run test:runtime` performs additional read-only protocol checks against the running Worker. `bun lint` includes both server and Svelte type checks and architecture-boundary checks.
 
 Live external delivery is deliberately not part of these checks: production domains, Email Routing rules, and the live sending binding must be configured separately.
