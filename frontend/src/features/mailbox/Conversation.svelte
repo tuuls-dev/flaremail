@@ -8,6 +8,7 @@
 	import { describeError } from "../../sdk/client";
 	import { renderEmailDocument } from "./render-email";
 	import { toast } from "svelte-sonner";
+	import { formatShortcut } from "../../keyboard/shortcuts";
 	let {
 		messages,
 		mailboxId,
@@ -87,7 +88,7 @@
 				class="icon-button"
 				aria-label="Archive conversation"
 				disabled={!messages.length}
-				title="Archive (E)"
+				title={`Archive (${formatShortcut("archive")})`}
 				onclick={onarchive}><Icon name="archive" size={17} /></button
 			><button
 				class="icon-button"
@@ -195,7 +196,7 @@
 				</article>{/each}
 			<div class="reply-actions">
 				<button class="button" onclick={() => onreply(messages[messages.length - 1], "reply")}
-					><Icon name="reply" size={16} />Reply <kbd>R</kbd></button
+					><Icon name="reply" size={16} />Reply <kbd>{formatShortcut("reply")}</kbd></button
 				><button class="button" onclick={() => onreply(messages[messages.length - 1], "replyAll")}
 					><Icon name="replyAll" size={16} />Reply all</button
 				><button
@@ -211,8 +212,11 @@
 			</div>
 			<p>Choose a conversation to read it here.</p>
 			<div class="reader-shortcuts">
-				<span><kbd>J</kbd> <kbd>K</kbd> move</span><span><kbd>↵</kbd> open</span><span
-					><kbd>C</kbd> compose</span
+				<span
+					><kbd>{formatShortcut("nextConversation")}</kbd>
+					<kbd>{formatShortcut("previousConversation")}</kbd> move</span
+				><span><kbd>{formatShortcut("openConversation")}</kbd> open</span><span
+					><kbd>{formatShortcut("compose")}</kbd> compose</span
 				>
 			</div>
 		</div>{/if}
@@ -459,6 +463,8 @@
 	}
 	.reader-shortcuts {
 		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
 		gap: 18px;
 		margin-top: 24px;
 	}
