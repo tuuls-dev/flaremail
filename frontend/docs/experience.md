@@ -45,7 +45,10 @@ Differentiate empty inboxes, empty drafts, search misses, missing access, unconf
 ## Human interaction details
 
 - Every shortcut has a pointer-accessible equivalent and appears in the shortcut-help Dialog.
+- App action shortcuts require Command + Shift on macOS or Ctrl + Shift on Windows/Linux; there are no single-key mailbox shortcuts. Shared definitions drive matching and visible hints. Normal typing, focused-control activation, Escape dismissal, and editor formatting retain their standard behavior.
 - Global shortcuts are suppressed while typing or while an overlay owns interaction.
+- Send uses Command/Ctrl + Shift + Enter inside the composer only, and is suppressed while busy, locked, or interacting with a nested overlay. Handled events, held-key repeats, and IME composition do not trigger app shortcuts.
+- Familiar app combinations take precedence over browser shortcuts where the browser allows interception; some browsers or operating systems reserve these combinations.
 - Dialog and Popover use Bits UI primitives for focus, dismissal, and accessibility.
 - Focus indicators are visible; controls have accessible names; layout respects reduced motion.
 - Context switches cancel or ignore stale responses. Background polling preserves user activity.

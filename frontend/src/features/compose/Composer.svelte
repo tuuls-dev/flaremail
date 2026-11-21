@@ -9,6 +9,7 @@
 	import { ComposeModel } from "./model.svelte";
 	import { formatFileSize } from "../../sdk/attachments";
 	import { describeError } from "../../sdk/client";
+	import { formatShortcut, matchShortcut, hasOpenShortcutOverlay } from "../../keyboard/shortcuts";
 	let {
 		initialDraft,
 		mailbox,
@@ -110,24 +111,25 @@
 	}
 
 	function handleSendShortcut(event: KeyboardEvent) {
-		if (discardOpen) {
+		const cannotSend = [discardOpen, closeUnsavedOpen, busy, model.locked, !open].some(Boolean);
+
+		if (cannotSend || matchShortcut(event, "composer") !== "send") {
 			return;
 		}
 
 		const activeDialog =
 			event.target instanceof HTMLElement ? event.target.closest('[role="dialog"]') : null;
 
-		if (activeDialog && !activeDialog.querySelector("#compose-to")) {
+		if (!activeDialog?.querySelector("#compose-to")) {
 			return;
 		}
 
-		if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-			event.preventDefault();
-
-			if (!busy && !model.locked) {
-				void sendMessage();
-			}
+		if (hasOpenShortcutOverlay(activeDialog)) {
+			return;
 		}
+
+		event.preventDefault();
+		void sendMessage();
 	}
 </script>
 
@@ -216,7 +218,8 @@
 				class="button primary send-button"
 				onclick={sendMessage}
 				disabled={busy || model.locked}
-				><Icon name="send" size={15} />{model.sending ? "Sending…" : "Send message"}<kbd>⌘ ↵</kbd
+				><Icon name="send" size={15} />{model.sending ? "Sending…" : "Send message"}<kbd
+					>{formatShortcut("send")}</kbd
 				></button
 			><button
 				class="icon-button"

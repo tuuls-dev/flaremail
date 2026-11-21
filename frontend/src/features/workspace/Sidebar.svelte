@@ -5,6 +5,7 @@
 	import { authState } from "../auth/state.svelte";
 	import { buildMailboxPath, navigate } from "../../app/router";
 	import { mutate } from "../../sdk/client";
+	import { formatShortcut } from "../../keyboard/shortcuts";
 	let {
 		workspace,
 		mailbox,
@@ -89,7 +90,8 @@
 		>
 	</div>
 	<button class="compose-button" onclick={oncompose} disabled={!mailbox}
-		><Icon name="plus" size={18} /><span>Compose</span><kbd>C</kbd></button
+		><Icon name="plus" size={18} /><span>Compose</span><kbd>{formatShortcut("compose")}</kbd
+		></button
 	>
 	<nav aria-label="Mail folders">
 		{#each folderItems as item}<a
@@ -127,7 +129,9 @@
 	</nav>
 	<div class="sidebar-bottom">
 		<button class="shortcut-button" onclick={onhelp}
-			><Icon name="command" size={15} /><span>Keyboard shortcuts</span><kbd>?</kbd></button
+			><Icon name="command" size={15} /><span>Keyboard shortcuts</span><kbd
+				>{formatShortcut("showHelp")}</kbd
+			></button
 		>
 		<div class="account">
 			<Popover label="Account menu" triggerClass="account-trigger" align="start"
@@ -321,6 +325,7 @@
 	}
 	.shortcut-button {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: 9px;
 		border: 0;
@@ -333,6 +338,7 @@
 	.shortcut-button kbd {
 		margin-left: auto;
 		font-size: 9px;
+		white-space: nowrap;
 	}
 	.account {
 		border-top: 1px solid var(--color-border);

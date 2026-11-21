@@ -13,7 +13,15 @@
 	import { MailboxModel } from "./model.svelte";
 	import { route, navigate, buildMailboxPath } from "../../app/router";
 	import { mutate, describeError } from "../../sdk/client";
-	import { shortcuts, isTypingTarget } from "../../keyboard/shortcuts";
+	import {
+		shortcuts,
+		formatShortcut,
+		readShortcutKeys,
+		matchShortcut,
+		isTypingTarget,
+		hasOpenShortcutOverlay,
+		type ShortcutAction,
+	} from "../../keyboard/shortcuts";
 	import { toast } from "svelte-sonner";
 	const model = new MailboxModel();
 	let searchInput: HTMLInputElement;
@@ -205,8 +213,7 @@
 
 	function shouldIgnoreShortcut(event: KeyboardEvent) {
 		const hasOpenOverlay = [composeDraft, helpOpen, labelOpen, mobileNavOpen].some(Boolean);
-		const usesModifier = event.metaKey || event.ctrlKey || event.altKey;
-		return [hasOpenOverlay, usesModifier, isTypingTarget(event.target)].some(Boolean);
+		return [hasOpenOverlay, hasOpenShortcutOverlay(), isTypingTarget(event.target)].some(Boolean);
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -214,63 +221,42 @@
 			return;
 		}
 
-		const command = event.key.toLowerCase();
+		const action = matchShortcut(event, "mailbox");
 
-		if (command === "c") {
+		if (!action) {
+			return;
+		}
+
+		const commands: Partial<Record<ShortcutAction, () => void>> = {
+			compose: mailbox ? openCompose : undefined,
+			search: () => searchInput.focus(),
+			showHelp: () => {
+				helpOpen = true;
+			},
+		};
+		const executeCommand = commands[action] ?? readMailCommandHandler(action);
+
+		if (executeCommand) {
 			event.preventDefault();
-			openCompose();
-			return;
+			executeCommand();
 		}
-
-		if (command === "/") {
-			event.preventDefault();
-			searchInput.focus();
-			return;
-		}
-
-		if (command === "?") {
-			helpOpen = true;
-			return;
-		}
-
-		handleMailCommand(event, command);
 	}
 
-	function handleMailCommand(event: KeyboardEvent, command: string) {
-		const targetsControl =
-			event.target instanceof HTMLElement && Boolean(event.target.closest("button,a,input,select"));
-
-		if (command === "enter" && targetsControl) {
-			return;
-		}
-
-		const commands: Record<string, () => void> = {
-			j: () => moveFocus(1),
-			k: () => moveFocus(-1),
-			enter: () => openConversation(focusedIndex),
-			x: () => {
-				const item = model.items[focusedIndex];
-
-				if (item) {
-					model.toggleSelection(item.threadId);
-				}
-			},
-			e: () => actOnConversation("archive"),
-			r: () => {
-				const message = model.messages.at(-1);
-
-				if (message) {
-					composeReply(message, "reply");
-				}
-			},
-			escape: closeConversation,
+	function readMailCommandHandler(action: ShortcutAction) {
+		const focusedItem = model.items[focusedIndex];
+		const replyMessage = threadId ? model.messages.at(-1) : undefined;
+		const archiveTarget = model.selected.length || threadId;
+		const canArchive = Boolean(archiveTarget);
+		const commands: Partial<Record<ShortcutAction, () => void>> = {
+			nextConversation: model.items.length ? () => moveFocus(1) : undefined,
+			previousConversation: model.items.length ? () => moveFocus(-1) : undefined,
+			openConversation: focusedItem ? () => openConversation(focusedIndex) : undefined,
+			toggleSelection: focusedItem ? () => model.toggleSelection(focusedItem.threadId) : undefined,
+			archive: canArchive ? () => actOnConversation("archive") : undefined,
+			reply: replyMessage ? () => composeReply(replyMessage, "reply") : undefined,
+			closeConversation: threadId ? closeConversation : undefined,
 		};
-		const execute = commands[command];
-
-		if (execute) {
-			event.preventDefault();
-			execute();
-		}
+		return commands[action];
 	}
 
 	function moveFocus(direction: number) {
@@ -328,7 +314,7 @@
 					aria-label="Search this mailbox"
 					maxlength="500"
 					placeholder="Search your conversations…"
-				/><kbd>/</kbd>{#if searchText}<button
+				/><kbd>{formatShortcut("search")}</kbd>{#if searchText}<button
 						type="button"
 						class="icon-button"
 						aria-label="Clear search"
@@ -547,11 +533,11 @@
 <Dialog
 	bind:open={helpOpen}
 	title="Keyboard shortcuts"
-	description="Keyboard shortcuts work outside text fields. Every action is also available with a pointer."
+	description="Use Command + Shift on Mac or Ctrl + Shift on Windows/Linux. Mailbox shortcuts work outside text fields; Send works inside the composer. Every action is also available with a pointer."
 	><div class="shortcut-list">
 		{#each shortcuts as shortcut}<div>
 				<span>{shortcut.label}</span><span
-					>{#each shortcut.keys as key}<kbd>{key}</kbd>{/each}</span
+					>{#each readShortcutKeys(shortcut.action) as key}<kbd>{key}</kbd>{/each}</span
 				>
 			</div>{/each}
 	</div></Dialog
