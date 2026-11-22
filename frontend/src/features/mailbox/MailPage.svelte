@@ -530,10 +530,7 @@
 				void model.refreshMailbox();
 			}}
 		/>{/key}{/if}
-<Dialog
-	bind:open={helpOpen}
-	title="Keyboard shortcuts"
-	description="Use Command + Shift on Mac or Ctrl + Shift on Windows/Linux. Mailbox shortcuts work outside text fields; Send works inside the composer. Every action is also available with a pointer."
+<Dialog bind:open={helpOpen} title="Keyboard shortcuts" description=""
 	><div class="shortcut-list">
 		{#each shortcuts as shortcut}<div>
 				<span>{shortcut.label}</span><span
@@ -603,6 +600,7 @@
 		height: 100dvh;
 		display: grid;
 		grid-template-columns: 228px 1fr;
+		grid-template-rows: minmax(0, 1fr);
 		overflow: hidden;
 	}
 	.desktop-sidebar {
@@ -611,6 +609,7 @@
 	}
 	main {
 		min-width: 0;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 		padding: 0 12px 12px 0;
@@ -628,6 +627,7 @@
 		gap: 10px;
 		align-items: center;
 		width: 440px;
+		min-width: 0;
 		color: var(--color-muted);
 		border-radius: 9px;
 	}
@@ -637,7 +637,8 @@
 		outline: none;
 		color: var(--color-text);
 		font-size: 12px;
-		width: 100%;
+		flex: 1;
+		min-width: 0;
 		padding: 12px 0;
 	}
 	.search-box input::placeholder {
@@ -645,7 +646,10 @@
 	}
 	.search-box kbd {
 		background: transparent;
-		width: 20px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		white-space: nowrap;
 		font-size: 10px;
 		flex-shrink: 0;
 	}

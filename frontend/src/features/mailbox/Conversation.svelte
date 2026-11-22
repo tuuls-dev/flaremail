@@ -261,6 +261,7 @@
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
+		min-height: 0;
 		background: var(--color-surface);
 	}
 	.conversation-toolbar {
@@ -296,6 +297,11 @@
 		padding: 34px 36px 20px;
 		overflow: auto;
 		flex: 1;
+		min-height: 0;
+		scrollbar-width: none;
+	}
+	.conversation-scroll::-webkit-scrollbar {
+		display: none;
 	}
 	.subject-heading {
 		margin-bottom: 34px;
