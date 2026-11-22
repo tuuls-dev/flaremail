@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
+	import BrandLink from "../../components/ui/BrandLink.svelte";
 	import Icon from "../../components/ui/Icon.svelte";
 	import { authState } from "../../features/auth/state.svelte";
 	import { mutate } from "../../sdk/client";
@@ -19,11 +20,8 @@
 
 <div class="utility-layout">
 	<aside>
-		<a class="brand" href="/"
-			><span class="brand-mark"><Icon name="mail" size={21} /></span><span
-				>flaremail<span class="dot">.</span></span
-			></a
-		><a class="back" href="/"><Icon name="back" size={15} />Back to mail</a><span class="eyebrow"
+		<div class="brand"><BrandLink /></div>
+		<a class="back" href="/"><Icon name="back" size={15} />Back to mail</a><span class="eyebrow"
 			>Your workspace</span
 		>
 		<nav>
@@ -66,16 +64,7 @@
 		border-right: 1px solid var(--color-border);
 	}
 	.brand {
-		display: flex;
-		gap: 10px;
-		align-items: center;
-		font-weight: 650;
-		font-size: 22px;
-		letter-spacing: -0.8px;
 		padding: 0 8px;
-	}
-	.dot {
-		color: var(--color-primary);
 	}
 	.back {
 		display: flex;

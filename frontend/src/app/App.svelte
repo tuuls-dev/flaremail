@@ -24,7 +24,7 @@
 <svelte:boundary>
 	{#if await startup}<Router />{/if}
 	{#snippet pending()}<div class="startup">
-			<div class="brand-mark"><Icon name="mail" size={24} /></div>
+			<img src="/favicon.svg" alt="Flaremail" width="38" height="38" />
 			<p>Opening your workspace<span class="loading-dots">…</span></p>
 		</div>{/snippet}
 	{#snippet failed(error, reset)}<div class="startup">

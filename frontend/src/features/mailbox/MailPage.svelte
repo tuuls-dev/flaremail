@@ -5,6 +5,7 @@
 	import Icon from "../../components/ui/Icon.svelte";
 	import Dialog from "../../components/ui/Dialog.svelte";
 	import Popover from "../../components/ui/Popover.svelte";
+	import BrandLink from "../../components/ui/BrandLink.svelte";
 	import Sidebar from "../workspace/Sidebar.svelte";
 	import Conversation from "./Conversation.svelte";
 	import MessageRow from "./MessageRow.svelte";
@@ -300,6 +301,7 @@
 				aria-label="Open navigation"
 				onclick={() => (mobileNavOpen = true)}><Icon name="menu" /></button
 			>
+			<BrandLink />
 			<form
 				class="search-box"
 				onsubmit={(event) => {

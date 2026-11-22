@@ -1,16 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
+	import BrandLink from "../../components/ui/BrandLink.svelte";
 	import Icon from "../../components/ui/Icon.svelte";
 	let { children }: { children: Snippet } = $props();
 </script>
 
 <div class="auth-layout">
 	<aside>
-		<a class="brand" href="/"
-			><span class="brand-mark"><Icon name="mail" size={22} /></span>flaremail<span
-				class="brand-dot">.</span
-			></a
-		>
+		<BrandLink />
 		<div class="intro">
 			<div class="illustration" aria-hidden="true">
 				<div class="illustration-top"><i></i><i></i><i></i></div>
@@ -46,18 +43,6 @@
 		flex-direction: column;
 		padding: 42px 48px;
 		color: #30334f;
-	}
-	.brand {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		font-size: 23px;
-		font-weight: 650;
-		letter-spacing: -1px;
-	}
-	.brand-dot {
-		color: #7372d7;
-		margin-left: -9px;
 	}
 	.intro {
 		margin: auto 0;
@@ -135,6 +120,7 @@
 		}
 		aside {
 			padding: 24px;
+			color: var(--color-text);
 			background: var(--color-bg);
 		}
 		.intro {
@@ -142,9 +128,6 @@
 		}
 		main {
 			padding: 32px 24px;
-		}
-		.brand {
-			font-size: 20px;
 		}
 	}
 </style>

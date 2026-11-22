@@ -48,11 +48,6 @@
 </script>
 
 <div class="sidebar">
-	<a class="brand" href="/"
-		><span class="brand-mark"><Icon name="mail" size={21} /></span><span
-			>flaremail<span class="brand-dot">.</span></span
-		></a
-	>
 	<div class="workspace-switcher">
 		<Popover
 			label="Switch organization or mailbox"
@@ -167,23 +162,6 @@
 		height: auto;
 		padding: 26px 17px 14px;
 		min-width: 0;
-	}
-	.brand {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		font-size: 22px;
-		font-weight: 650;
-		letter-spacing: -0.8px;
-		margin: 0 9px 30px;
-	}
-	.brand-mark {
-		height: 35px;
-		width: 35px;
-		border-radius: 10px;
-	}
-	.brand-dot {
-		color: var(--color-primary);
 	}
 	.workspace-switcher {
 		margin-bottom: 22px;
@@ -393,9 +371,6 @@
 		margin-top: 4px;
 	}
 	@media (max-height: 760px) {
-		.brand {
-			margin-bottom: 18px;
-		}
 		.workspace-switcher {
 			margin-bottom: 16px;
 		}
