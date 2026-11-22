@@ -29,20 +29,29 @@ async function resolveThreadId(
 	mailboxId: string,
 	references: string[],
 	fallbackId: string,
+	messageId: string,
 ) {
-	for (const reference of references.toReversed()) {
-		const parentMessage = await findRecord(
-			database,
-			"SELECT thread_id FROM messages WHERE mailbox_id=? AND message_id=? LIMIT 1",
-			[mailboxId, reference],
-		);
+	const relatedIds = JSON.stringify([messageId].concat(references).filter(Boolean));
+	// Match parents, early children, and siblings that reference a not-yet-delivered ancestor.
+	const relatedMessages = await database.execute({
+		sql: `SELECT DISTINCT m.thread_id FROM messages m WHERE m.mailbox_id=? AND (
+			m.message_id IN (SELECT value FROM json_each(?)) OR
+			m.in_reply_to IN (SELECT value FROM json_each(?)) OR
+			EXISTS (SELECT 1 FROM json_each(m.references_json) r WHERE r.value IN (SELECT value FROM json_each(?)))
+		) ORDER BY m.thread_id`,
+		args: [mailboxId, relatedIds, relatedIds, relatedIds],
+	});
+	const threadIds = relatedMessages.rows.map((record) => readStringField(record, "thread_id"));
+	const threadId = threadIds[0] ?? fallbackId;
 
-		if (parentMessage) {
-			return readStringField(parentMessage, "thread_id");
-		}
+	if (threadIds.length > 1) {
+		await database.execute({
+			sql: `UPDATE messages SET thread_id=? WHERE mailbox_id=? AND thread_id IN (${threadIds.map(() => "?").join(",")})`,
+			args: [threadId, mailboxId].concat(threadIds),
+		});
 	}
 
-	return fallbackId;
+	return threadId;
 }
 
 function readReceivedAt(date: string | undefined) {
@@ -162,11 +171,13 @@ export async function ingestEmail(
 				return;
 			}
 
+			const headerMessageId = parsedEmail.messageId ?? "";
 			const threadId = await resolveThreadId(
 				transactionDatabase,
 				mailboxId,
 				readReferences(parsedEmail),
 				messageId,
+				headerMessageId,
 			);
 			const rawBlob = await putBlob(transactionDatabase, mailboxId, rawEmail, {
 				filename: "message.eml",
