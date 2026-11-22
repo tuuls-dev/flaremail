@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import { Editor } from "@tiptap/core";
 	import StarterKit from "@tiptap/starter-kit";
+	import Link from "@tiptap/extension-link";
 	import Dialog from "../../components/ui/Dialog.svelte";
 	import Icon from "../../components/ui/Icon.svelte";
 	let {
@@ -23,7 +24,14 @@
 	onMount(() => {
 		editor = new Editor({
 			element: editorElement,
-			extensions: [StarterKit],
+			extensions: [
+				StarterKit,
+				Link.configure({
+					openOnClick: false,
+					autolink: true,
+					protocols: ["http", "https", "mailto"],
+				}),
+			],
 			content: initialHtml,
 			editorProps: {
 				attributes: {

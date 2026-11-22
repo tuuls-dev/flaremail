@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { applySavedTheme } from "../features/settings/theme";
+	import { applySavedTheme } from "../features/settings/theme.svelte";
 	import { Router } from "sv-router";
 	import { Toaster } from "svelte-sonner";
 	import { initializeApplication, authState } from "../features/auth/state.svelte";

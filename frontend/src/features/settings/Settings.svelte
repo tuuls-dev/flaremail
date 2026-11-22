@@ -4,7 +4,7 @@
 	import { authState, refreshSession } from "../auth/state.svelte";
 	import { mutate, describeError } from "../../sdk/client";
 	import { toast } from "svelte-sonner";
-	import { setTheme } from "./theme";
+	import { setTheme } from "./theme.svelte";
 	import { navigate } from "../../app/router";
 	const initialDisplayName = authState.session?.user.name ?? "";
 	let displayName = $state(initialDisplayName);

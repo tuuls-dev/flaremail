@@ -30,6 +30,7 @@ export function resizeEmailFrame(frame: HTMLIFrameElement) {
 	}
 
 	frame.addEventListener("load", observeEmailBody);
+	observeEmailBody();
 	return {
 		destroy() {
 			frame.removeEventListener("load", observeEmailBody);

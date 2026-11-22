@@ -6,8 +6,10 @@
 	import Popover from "../../components/ui/Popover.svelte";
 	import { downloadAttachment, readAttachment, formatFileSize } from "../../sdk/attachments";
 	import { describeError } from "../../sdk/client";
-	import { renderEmailDocument } from "./render-email";
+	import { readEmailChrome, renderEmailDocument } from "./render-email";
 	import { resizeEmailFrame } from "./resize-email";
+	import { linkifyPlainText } from "./linkify-email";
+	import { theme } from "../settings/theme.svelte";
 	import { toast } from "svelte-sonner";
 	import { formatShortcut } from "../../keyboard/shortcuts";
 	let {
@@ -206,9 +208,12 @@
 								message.html,
 								loadRemoteImages,
 								inlineImages[message.id] ?? {},
+								readEmailChrome(theme.name),
 							)}
 						></iframe>{:else}<div class="plain-text">
-							{message.text || "This message has no text content."}
+							{@html message.text
+								? linkifyPlainText(message.text)
+								: "This message has no text content."}
 						</div>{/if}
 					{#if message.attachments.length}<div class="attachments">
 							<span class="attachment-label"
@@ -370,10 +375,14 @@
 		color: var(--color-text);
 		padding-left: 43px;
 	}
+	.plain-text :global(a) {
+		color: var(--color-primary);
+		text-decoration: underline;
+	}
 	iframe {
 		border: 0;
 		width: 100%;
-		background: white;
+		background: var(--color-surface);
 		border-radius: 4px;
 		height: 1px;
 		display: block;
